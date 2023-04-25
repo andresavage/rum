@@ -1,0 +1,30 @@
+29 instructions
+r1 := 72;
+output r1;
+r1 := 101;
+output r1;
+r1 := 108;
+output r1;
+r1 := 108;
+output r1;
+r1 := 111;
+output r1;
+r1 := 44;
+output r1;
+r1 := 32;
+output r1;
+r1 := 119;
+output r1;
+r1 := 111;
+output r1;
+r1 := 114;
+output r1;
+r1 := 108;
+output r1;
+r1 := 100;
+output r1;
+r1 := 46;
+output r1;
+r1 := 10;
+output r1;
+halt
