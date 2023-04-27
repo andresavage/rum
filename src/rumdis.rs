@@ -396,8 +396,10 @@ static RL: Field = Field{width: 3, lsb: 25};
 static VL: Field = Field{width: 25, lsb: 0};
 static OP: Field = Field{width: 4, lsb: 28};
 
+#[inline]
 fn mask(bits: u32) -> u32{ ( 1 << bits) - 1 }
 
+#[inline]
 pub fn get(field: &Field, instruction: Umi) -> u32 {
   (instruction >> field.lsb) & mask(field.width)
 }
@@ -405,6 +407,8 @@ pub fn get(field: &Field, instruction: Umi) -> u32 {
 pub fn op(instruction: Umi) -> u32 {
 (instruction >> OP.lsb) & mask(OP.width)
 } 
+
+
 
 
 //////////////////// Helper Functions \\\\\\\\\\\\\\\\\\\\
