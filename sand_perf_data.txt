@@ -1,0 +1,413 @@
+--------------------------------------------------------------------------------
+Profile data file 'callgrind.out' (creator: callgrind-3.18.1)
+--------------------------------------------------------------------------------
+I1 cache: 
+D1 cache: 
+LL cache: 
+Timerange: Basic block 0 - 13901577133
+Trigger: Program termination
+Profiled target:  target/release-with-debug/rum ../rum-binaries/sandmark.umz (PID 3864, part 1)
+Events recorded:  Ir
+Events shown:     Ir
+Event sort order: Ir
+Thresholds:       99
+Include dirs:     
+User annotated:   
+Auto-annotation:  on
+
+--------------------------------------------------------------------------------
+Ir                      
+--------------------------------------------------------------------------------
+75,307,570,152 (100.0%)  PROGRAM TOTALS
+
+--------------------------------------------------------------------------------
+Ir                       file:function
+--------------------------------------------------------------------------------
+45,716,949,245 (60.71%)  src/rumdis.rs:rum::rumdis::UM::run [/home/andre/URI/411/RUM/rum/target/release-with-debug/rum]
+13,060,298,930 (17.34%)  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/core/src/slice/index.rs:rum::rumdis::UM::run
+ 6,459,270,843 ( 8.58%)  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/core/src/ops/bit.rs:rum::rumdis::UM::run
+ 2,975,202,226 ( 3.95%)  ./malloc/./malloc/malloc.c:_int_free [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 2,519,323,267 ( 3.35%)  ./malloc/./malloc/malloc.c:calloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+ 2,420,010,904 ( 3.21%)  ./malloc/./malloc/malloc.c:_int_malloc [/usr/lib/x86_64-linux-gnu/libc.so.6]
+   770,060,126 ( 1.02%)  ./malloc/./malloc/malloc.c:free [/usr/lib/x86_64-linux-gnu/libc.so.6]
+   350,415,628 ( 0.47%)  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/alloc/src/vec/mod.rs:rum::rumdis::UM::run
+   280,140,235 ( 0.37%)  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/alloc/src/raw_vec.rs:rum::rumdis::UM::run
+   175,144,976 ( 0.23%)  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/std/src/sys/unix/alloc.rs:rum::rumdis::UM::run
+
+--------------------------------------------------------------------------------
+-- Auto-annotated source: src/rumdis.rs
+--------------------------------------------------------------------------------
+Ir                      
+
+-- line 25 ----------------------------------------
+             .             fn new() -> Registers{
+             .               Registers { 
+             .                 registers: [0 as u32;8]
+             .               }
+             .             }
+             .           
+             .             //get and set
+             .             fn get(&mut self,register:usize) -> &u32{
+ 4,292,812,209 ( 5.70%)      &self.registers[register]
+             .             }
+             .           
+             .             fn set(&mut self, register:usize, value:u32){
+ 3,022,700,827 ( 4.01%)      self.registers[register] = value;
+             .             }
+             .           }
+             .           
+             .           
+             .           
+             .           
+             .           //////////////////// Memory \\\\\\\\\\\\\\\\\\\\
+             .           //Will store and manage all memory segments
+-- line 45 ----------------------------------------
+-- line 48 ----------------------------------------
+             .               pub memory_segments:Vec<Vec<u32>>,
+             .               //will store indexes of cleared memory locations
+             .               pub cleared_memory_locations:Vec<u32>
+             .           }
+             .           impl Memory {
+             .           
+             .             fn new(instructions:Vec<u32>)  -> Memory{
+             .           
+             3 ( 0.00%)      Memory { memory_segments: vec![instructions], cleared_memory_locations: Vec::new()}
+             .           
+             .             }
+             .           
+             .             fn get_inst(&mut self,counter:usize) -> &u32{
+             .           
+             .               &self.memory_segments[0][counter]
+             .           
+             .             }
+-- line 64 ----------------------------------------
+-- line 74 ----------------------------------------
+             .             pub memory:Memory,
+             .             pub counter:usize
+             .           }
+             .           
+             .           impl UM {
+             .           
+             .             pub fn new(instructions: Vec<u32>) -> UM{
+             .           
+            10 ( 0.00%)      UM {register: Registers::new(), memory: Memory::new(instructions),counter:0}
+             .           
+             .             }
+             .           
+             .             // //print pseudo code for functions
+             .             // pub fn run_skel(&mut self){
+             .             //   for instruction in self.memory.memory_segments[0].clone() {
+             .             //     println!("{}",disassemble_skel(instruction))
+             .             //   }
+             .             // }
+             .           
+             7 ( 0.00%)    pub fn run(&mut self){
+             .               //let i = 0;
+             .               //for instruction in self.memory.memory_segments[0].clone() {
+             .           
+             .               //let mut inst_arr:[u32; self.memory.memory_segments[0].len()] = self.memory.memory_segments[0];
+             .               
+             .               loop {
+             .           
+             .                 //let offset = self.counter;
+-- line 101 ----------------------------------------
+-- line 104 ----------------------------------------
+             .                 //let inst = self.memory.memory_segments[0][self.counter];
+             .           
+             .                   //println!("{}",i);
+             .                   //print register data
+             .                   //println!("About to execute instruction {}", self.counter);
+             .                   //println!("Registers Before: {:?}", self.register.registers);
+             .                   //println!("Memory Segments Before: {:?}", self.memory.memory_segments);
+             .                   // dbg!(&self.memory.memory_segments);
+10,567,487,810 (14.03%)          Self::disassemble(self,self.memory.memory_segments[0][self.counter]);
+             .                   // println!("Registers After:{:?}", self.register.registers);
+             .                   // println!("Memory Segments After: {:?}", self.memory.memory_segments);
+             .                   // println!("_____________________________________________________");
+             .                   //println!();
+             .               
+             .                 
+             .               }
+             .             }
+             .           
+             .             fn disassemble(&mut self,inst: Umi) {
+             .           
+             .               match get(&OP, &inst) {
+             .           
+             .               //Conditional Move OP 0
+ 4,226,995,122 ( 5.61%)      o if o == Opcode::CMov as u32 => {
+             .                 
+             .                 let c = *self.register.get(get(&RC, &inst) as usize);
+             .           
+   135,213,970 ( 0.18%)        if c != 0{
+             .                 //register a
+             .                 let a_register = get(&RA, &inst) as usize;
+             .           
+             .                 //register values
+    60,481,500 ( 0.08%)        let b = *self.register.get(get(&RB, &inst) as usize);
+             .                 
+             .           
+             .                 
+             .                   self.register.set(a_register,b);
+             .                 }
+             .           
+             .                 self.counter += 1;
+             .           
+-- line 144 ----------------------------------------
+-- line 149 ----------------------------------------
+             .           
+             .                 //println!("r{} := m[r{}][r{}];", get(&RA, inst), get(&RB, inst), get(&RC, inst));
+             .           
+             .                 //register a
+             .                 let a_register = get(&RA, &inst) as usize;
+             .           
+             .                 //register values
+             .                 //let a = *self.register.get(get(&RA, inst) as usize);
+   483,706,356 ( 0.64%)        let b = *self.register.get(get(&RB, &inst) as usize);
+   483,706,356 ( 0.64%)        let c = *self.register.get(get(&RC, &inst) as usize);
+             .                 //dbg!(a,b,c);
+             .           
+ 1,451,119,068 ( 1.93%)        let value = self.memory.memory_segments[b as usize][c as usize];
+             .           
+             .                 self.register.set(a_register, value);
+             .                 self.counter += 1;
+             .               },
+             .           
+             .               //Segmented Store OP 2
+             .               o if o == Opcode::Store as u32 => {
+             .           
+             .                 //println!("m[r{}][r{}] := r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst));
+             .           
+             .                 //register c
+             .                 //let c_register = get(&RC, inst) as usize;
+             .           
+             .                 //register values
+   402,552,662 ( 0.53%)        let a = *self.register.get(get(&RA, &inst) as usize);
+   402,552,662 ( 0.53%)        let b = *self.register.get(get(&RB, &inst) as usize);
+             .                 let c = *self.register.get(get(&RC, &inst) as usize);
+             .           
+ 1,207,657,986 ( 1.60%)        self.memory.memory_segments[a as usize][b as usize] = c;
+             .           
+             .                 //self.register.set(c_register, value);
+             .           
+             .                 // self.memory.memory_segments[get(&RA, inst) as usize]
+             .                 // [get(&RB, inst) as usize] 
+             .                 // = get(&RC, inst);
+             .           
+             .                 self.counter += 1;
+-- line 188 ----------------------------------------
+-- line 190 ----------------------------------------
+             .               },
+             .           
+             .               //Addition OP 3
+             .               o if o == Opcode::Add as u32 => {
+             .           
+             .           
+             .                 //register values
+             .                 let b = *self.register.get(get(&RB, &inst) as usize);
+    79,045,833 ( 0.10%)        let c = *self.register.get(get(&RC, &inst) as usize);
+             .           
+             .                 //register a
+             .                 let a_register = get(&RA, &inst) as usize;
+             .           
+             .                 //wrapping does the mod 2^32
+             .                 let value = add(&b,&c);
+             .           
+             .                 self.register.set(a_register,value);
+-- line 206 ----------------------------------------
+-- line 208 ----------------------------------------
+             .               },
+             .           
+             .               //Multiplication OP 4
+             .               o if o == Opcode::Mul as u32 => {
+             .           
+             .           
+             .                 //register values
+             .                 let b = *self.register.get(get(&RB, &inst) as usize);
+     2,598,390 ( 0.00%)        let c = *self.register.get(get(&RC, &inst) as usize);
+             .           
+             .                 //register a
+             .                 let a_register = get(&RA, &inst) as usize;
+             .           
+             .                 let value = mul(&b,&c);
+             .           
+             .                 self.register.set(a_register, value);
+             .                 self.counter += 1;
+             .               },
+             .           
+             .               //Division OP 5
+             .               o if o == Opcode::Div as u32 => {
+             .           
+             .                 //register values
+     4,644,271 ( 0.01%)        let b = *self.register.get(get(&RB, &inst) as usize);
+     4,644,271 ( 0.01%)        let c = *self.register.get(get(&RC, &inst) as usize);
+             .           
+             .                 //register a
+             .                 let a_register = get(&RA, &inst) as usize;
+             .           
+             .                 // let value = b / c;
+             .                 let value = div(&b,&c);
+             .           
+             .                 self.register.set(a_register, value);
+-- line 240 ----------------------------------------
+-- line 244 ----------------------------------------
+             .           
+             .               //Bitwise NAND OP 6
+             .               o if o == Opcode::Nand as u32 => {
+             .           
+             .                 let a_register = get(&RA, &inst) as usize;
+             .           
+             .                 //values
+             .                 let b = *self.register.get(get(&RB, &inst) as usize);
+   105,890,205 ( 0.14%)        let c = *self.register.get(get(&RC, &inst) as usize);
+             .           
+             .                 //nand values
+             .                 let value = bitwise_nand(b,c);
+             .           
+             .           
+             .                 self.register.set(a_register,value);
+             .                 self.counter += 1;
+             .           
+             .               },
+             .           
+             .               //Halt Exit Code 7
+             .               o if o == Opcode::Halt as u32 => {
+             .           
+             1 ( 0.00%)        std::process::exit(0);
+         2,208 ( 0.00%)  => /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/std/src/process.rs:std::process::exit (1x)
+             .           
+             .               },
+             .           
+             .               //Map Segment OP 8
+             .               o if o == Opcode::MapSegment as u32 => {
+             .                 let b_reg = get(&RB, &inst) as usize;
+             .           
+    70,069,926 ( 0.09%)        let c_value = *self.register.get(get(&RC, &inst) as usize);
+             .           
+             .                 let new_seg = vec![0;c_value as usize];
+             .                 
+             .             
+    35,034,963 ( 0.05%)        if !self.memory.cleared_memory_locations.is_empty(){
+             .                   self.register.set(b_reg, self.memory.cleared_memory_locations.pop().unwrap());
+             .                   let b_value = *self.register.get(get(&RB, &inst) as usize);
+   140,010,868 ( 0.19%)          self.memory.memory_segments[b_value as usize] = new_seg;
+             .                 }
+             .           
+             .                 else {
+             .                   
+             .                   self.memory.memory_segments.push(new_seg);
+        32,246 ( 0.00%)          self.register.set(b_reg, (self.memory.memory_segments.len() - 1) as u32);
+             .           
+             .                 }
+             .                 
+             .           
+             .                 self.counter += 1;
+             .               },
+             .           
+             .               //Unmap Segment OP 9
+             .               o if o == Opcode::UnmapSegment as u32 => {
+             .                 
+    35,024,451 ( 0.05%)        let c_value = *self.register.get(get(&RC, &inst) as usize);
+             .           
+             .                 self.memory.cleared_memory_locations.push(c_value.try_into().unwrap());
+             .           
+             .                 self.counter += 1;
+             .           
+   105,073,353 ( 0.14%)      },
+             .           
+             .               //Output OP 10
+             .               o if o == Opcode::Output as u32 => {
+             .           
+         2,400 ( 0.00%)        let c = *self.register.get(get(&RC, &inst) as usize);
+             .           
+             .           
+        12,000 ( 0.00%)        print!("{}",c as u8 as char);
+             .                 self.counter += 1;
+             .               },
+             .             
+             .           
+             .               //Input OP 11
+             .           
+             .               o if o == Opcode::Input as u32 =>  {
+             .                 
+-- line 321 ----------------------------------------
+-- line 333 ----------------------------------------
+             .           
+             .                 self.counter += 1;
+             .           
+             .               },
+             .           
+             .               //Load Program OP 12
+             .               o if o == Opcode::LoadProgram as u32 => {
+             .           
+   177,042,388 ( 0.24%)        let b_val = *self.register.get(get(&RB, &inst) as usize);
+             .           
+    88,521,194 ( 0.12%)        let c_val = *self.register.get(get(&RC, &inst) as usize);
+             .           
+             .           
+             .                 //new stuff
+             .                 //do not clone mem seg 0
+             .                 
+    88,521,194 ( 0.12%)          if b_val != 0  {
+             .                     
+             .                     let value = self.memory.memory_segments[b_val as usize].clone();
+             4 ( 0.00%)            self.memory.memory_segments[0] = value;
+             .           
+             .                   }
+             .                   
+             .                   let counter_value = c_val as usize;
+             .           
+             .                   self.counter =  counter_value;
+             .           
+             .               },
+-- line 360 ----------------------------------------
+-- line 383 ----------------------------------------
+             .           static RC: Field = Field{width: 3, lsb: 0};
+             .           static RL: Field = Field{width: 3, lsb: 25};
+             .           static VL: Field = Field{width: 25, lsb: 0};
+             .           static OP: Field = Field{width: 4, lsb: 28};
+             .           
+             .           fn mask(bits: u32) -> u32{ ( 1 << bits) - 1 }
+             .           
+             .           pub fn get(field: &Field, instruction: &Umi) -> u32 {
+ 3,502,041,692 ( 4.65%)    (instruction >> field.lsb) & mask(field.width)
+             .           }
+             .           
+             .           pub fn op(instruction: Umi) -> u32 {
+             .           (instruction >> OP.lsb) & mask(OP.width)
+             .           } 
+             .           
+             .           
+             .           //////////////////// Helper Functions \\\\\\\\\\\\\\\\\\\\
+             .           
+             .           
+             .           //6
+             .           fn bitwise_nand(a:u32,b:u32) -> u32{
+   211,780,410 ( 0.28%)    !(a & b)
+             .           }
+             .           
+             .           fn add(a:&u32,b:&u32) -> u32{
+             .             a.wrapping_add(*b)
+             .           }
+             .           
+             .           fn mul(a:&u32,b:&u32) -> u32{
+             .             a.wrapping_mul(*b)
+-- line 412 ----------------------------------------
+
+14,329,972,650 (19.03%)  <counts for unidentified lines in src/rumdis.rs>
+
+--------------------------------------------------------------------------------
+The following files chosen for auto-annotation could not be found:
+--------------------------------------------------------------------------------
+  ./malloc/./malloc/malloc.c
+  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/alloc/src/raw_vec.rs
+  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/alloc/src/vec/mod.rs
+  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/core/src/ops/bit.rs
+  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/core/src/slice/index.rs
+  /rustc/9eb3afe9ebe9c7d2b84b71002d44f4a0edac95e0/library/std/src/sys/unix/alloc.rs
+
+--------------------------------------------------------------------------------
+Ir                      
+--------------------------------------------------------------------------------
+31,386,976,608 (41.68%)  events annotated
+
