@@ -1,11 +1,7 @@
-//use std::fs::ReadDir;
-//#![allow(warnings, unused)]
-//use core::num::dec2flt::parse;
+use std::io::{stdin, Read};
+//use std::{char, process};
+//use rayon::prelude::*;
 
-use std::io::{self, stdin, Read};
-use std::{cell::Ref, vec, io::Split, string, path, mem::replace};
-use std::{char, process};
-use queues::*;
 type Umi = u32;
 
 #[derive(Debug)]
@@ -15,6 +11,7 @@ pub struct Field{
 }
 
 //////////////////// registers \\\\\\\\\\\\\\\\\\\\
+#[derive(Clone)]
 pub struct Registers {
   pub registers: [u32; 8]
 }
@@ -28,8 +25,8 @@ impl Registers {
   }
 
   //get and set
-  fn get(&mut self,register:usize) -> u32{
-    self.registers[register]
+  fn get(&mut self,register:usize) -> &u32{
+    &self.registers[register]
   }
 
   fn set(&mut self, register:usize, value:u32){
@@ -46,30 +43,24 @@ pub struct Memory {
 
     pub memory_segments:Vec<Vec<u32>>,
     //will store indexes of cleared memory locations
-    pub cleared_memory_locations:Vec<u32>,
+    pub cleared_memory_locations:Vec<u32>
 }
 impl Memory {
 
   fn new(instructions:Vec<u32>)  -> Memory{
-    
-    let mut temp_instruction_vec:Vec<Vec<u32>> = Vec::new();
 
-    temp_instruction_vec.push(instructions);
-
-    Memory { memory_segments: temp_instruction_vec, cleared_memory_locations: Vec::new() }
+    Memory { memory_segments: vec![instructions], cleared_memory_locations: Vec::new()}
 
   }
 
+  // fn get_inst(&mut self,counter:usize) -> &u32{
+
+  //   &self.memory_segments[0][counter]
+
+  // }
+
 }
 
-
-//////////////////// instruction struct \\\\\\\\\\\\\\\\\\\\
-
-// pub struct Instructions {
-  
-//   pub list:Vec<u32>,
-
-// }
 
 //////////////////// UM Stuct \\\\\\\\\\\\\\\\\\\\
 
@@ -96,10 +87,16 @@ impl UM {
   // }
 
   pub fn run(&mut self){
-
+    //let i = 0;
     //for instruction in self.memory.memory_segments[0].clone() {
+
+    //let mut inst_arr:[u32; self.memory.memory_segments[0].len()] = self.memory.memory_segments[0];
+    
     loop {
+
+      //let offset = self.counter;
       
+      //let inst = *self.memory.get_inst(self.counter);
       let inst = self.memory.memory_segments[0][self.counter];
 
         //println!("{}",i);
@@ -113,25 +110,27 @@ impl UM {
         // println!("Memory Segments After: {:?}", self.memory.memory_segments);
         // println!("_____________________________________________________");
         //println!();
+    
       
-
     }
   }
 
   fn disassemble(&mut self,inst: Umi) {
 
-    match get(&OP, inst) {
+    match get(&OP, &inst) {
 
     //Conditional Move OP 0
     o if o == Opcode::CMov as u32 => {
-
       
-      let c = self.register.get(get(&RC, inst) as usize);
+      let c = *self.register.get(get(&RC, &inst) as usize);
+      
 
       if c != 0{
+      //register a
+      let a_register = get(&RA, &inst) as usize;
+
       //register values
-      let a_register = get(&RA, inst) as usize;
-      let b = self.register.get(get(&RB, inst) as usize);
+      let b = *self.register.get(get(&RB, &inst) as usize);
       
 
       
@@ -145,12 +144,15 @@ impl UM {
     //Segmented Load OP 1
     o if o == Opcode::Load as u32 => {
 
+      //println!("r{} := m[r{}][r{}];", get(&RA, inst), get(&RB, inst), get(&RC, inst));
+
       //register a
-      let a_register = get(&RA, inst) as usize;
+      let a_register = get(&RA, &inst) as usize;
 
       //register values
-      let b = self.register.get(get(&RB, inst) as usize);
-      let c = self.register.get(get(&RC, inst) as usize);
+      //let a = *self.register.get(get(&RA, inst) as usize);
+      let b = *self.register.get(get(&RB, &inst) as usize);
+      let c = *self.register.get(get(&RC, &inst) as usize);
       //dbg!(a,b,c);
 
       let value = self.memory.memory_segments[b as usize][c as usize];
@@ -162,14 +164,23 @@ impl UM {
     //Segmented Store OP 2
     o if o == Opcode::Store as u32 => {
 
+      //println!("m[r{}][r{}] := r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst));
+
       //register c
+      //let c_register = get(&RC, inst) as usize;
 
       //register values
-      let a = self.register.get(get(&RA, inst) as usize);
-      let b = self.register.get(get(&RB, inst) as usize);
-      let c = self.register.get(get(&RC, inst) as usize);
+      let a = *self.register.get(get(&RA, &inst) as usize);
+      let b = *self.register.get(get(&RB, &inst) as usize);
+      let c = *self.register.get(get(&RC, &inst) as usize);
 
       self.memory.memory_segments[a as usize][b as usize] = c;
+
+      //self.register.set(c_register, value);
+
+      // self.memory.memory_segments[get(&RA, inst) as usize]
+      // [get(&RB, inst) as usize] 
+      // = get(&RC, inst);
 
       self.counter += 1;
 
@@ -178,18 +189,16 @@ impl UM {
     //Addition OP 3
     o if o == Opcode::Add as u32 => {
 
-      //println!("r{} := r{} + r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst));
 
       //register values
-      let b = self.register.get(get(&RB, inst) as usize);
-      let c = self.register.get(get(&RC, inst) as usize);
+      let b = *self.register.get(get(&RB, &inst) as usize);
+      let c = *self.register.get(get(&RC, &inst) as usize);
 
       //register a
-      let a_register = get(&RA, inst) as usize;
+      let a_register = get(&RA, &inst) as usize;
 
       //wrapping does the mod 2^32
-      // let value = b.wrapping_add(c);
-      let value = add(b,c);
+      let value = add(&b,&c);
 
       self.register.set(a_register,value);
       self.counter += 1;
@@ -198,18 +207,15 @@ impl UM {
     //Multiplication OP 4
     o if o == Opcode::Mul as u32 => {
 
-      //println!("r{} := r{} * r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst));
 
       //register values
-      let b = self.register.get(get(&RB, inst) as usize);
-      let c = self.register.get(get(&RC, inst) as usize);
+      let b = *self.register.get(get(&RB, &inst) as usize);
+      let c = *self.register.get(get(&RC, &inst) as usize);
 
       //register a
-      let a_register = get(&RA, inst) as usize;
+      let a_register = get(&RA, &inst) as usize;
 
-      //wrapping does the mod 2^32
-      // let value = b.wrapping_mul(c);
-      let value = mul(b,c);
+      let value = mul(&b,&c);
 
       self.register.set(a_register, value);
       self.counter += 1;
@@ -218,17 +224,15 @@ impl UM {
     //Division OP 5
     o if o == Opcode::Div as u32 => {
 
-      //println!("r{} := r{} / r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst));
-
       //register values
-      let b = self.register.get(get(&RB, inst) as usize);
-      let c = self.register.get(get(&RC, inst) as usize);
+      let b = *self.register.get(get(&RB, &inst) as usize);
+      let c = *self.register.get(get(&RC, &inst) as usize);
 
       //register a
-      let a_register = get(&RA, inst) as usize;
+      let a_register = get(&RA, &inst) as usize;
 
       // let value = b / c;
-      let value = div(b,c);
+      let value = div(&b,&c);
 
       self.register.set(a_register, value);
       self.counter += 1;
@@ -238,45 +242,40 @@ impl UM {
     //Bitwise NAND OP 6
     o if o == Opcode::Nand as u32 => {
 
-      //println!("r{} := r{} nand r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst));
-
-      let a_register = get(&RA, inst) as usize;
+      let a_register = get(&RA, &inst) as usize;
 
       //values
-      let b = self.register.get(get(&RB, inst) as usize);
-      let c = self.register.get(get(&RC, inst) as usize);
+      let b = *self.register.get(get(&RB, &inst) as usize);
+      let c = *self.register.get(get(&RC, &inst) as usize);
 
       //nand values
       let value = bitwise_nand(b,c);
 
-      //println!("a:{}", a);
-      //println!("value:{}", value);
 
       self.register.set(a_register,value);
       self.counter += 1;
 
     },
 
-    //Halt OP 7
+    //Halt Exit Code 7
     o if o == Opcode::Halt as u32 => {
 
-      process::exit(0);
+      std::process::exit(0);
 
     },
 
     //Map Segment OP 8
     o if o == Opcode::MapSegment as u32 => {
-      //format!("r{} := map segment (r{} words);", get(&RB, inst), get(&RC, inst))
-      let b_reg = get(&RB, inst) as usize;
+      let b_reg = get(&RB, &inst) as usize;
 
-      let c_value = self.register.get(get(&RC, inst) as usize);
+      let c_value = *self.register.get(get(&RC, &inst) as usize);
 
       let new_seg = vec![0;c_value as usize];
       
   
       if !self.memory.cleared_memory_locations.is_empty(){
         self.register.set(b_reg, self.memory.cleared_memory_locations.pop().unwrap());
-        let b_value = self.register.get(get(&RB, inst) as usize);
+        let b_value = *self.register.get(get(&RB, &inst) as usize);
         self.memory.memory_segments[b_value as usize] = new_seg;
       }
 
@@ -286,22 +285,17 @@ impl UM {
         self.register.set(b_reg, (self.memory.memory_segments.len() - 1) as u32);
 
       }
-
-      //self.memory.push(new_seg);
       
 
       self.counter += 1;
-      //todo!();
-    
     },
 
     //Unmap Segment OP 9
     o if o == Opcode::UnmapSegment as u32 => {
       
-      let c_value = self.register.get(get(&RC, inst) as usize);
+      let c_value = *self.register.get(get(&RC, &inst) as usize);
 
-      self.memory.cleared_memory_locations.push(c_value);
-      //self.memory.memory_segments[c_value as usize].clear();
+      self.memory.cleared_memory_locations.push(c_value.try_into().unwrap());
 
       self.counter += 1;
 
@@ -310,7 +304,7 @@ impl UM {
     //Output OP 10
     o if o == Opcode::Output as u32 => {
 
-      let c = self.register.get(get(&RC, inst) as usize);
+      let c = *self.register.get(get(&RC, &inst) as usize);
 
 
       print!("{}",c as u8 as char);
@@ -323,10 +317,7 @@ impl UM {
     o if o == Opcode::Input as u32 =>  {
       
       let mut buffer: [u8;1] = [0];
-      let c = get(&RC, inst) as usize;
-      // println!("buffer: {buffer:?}, c: {c:?}");
-      // println!("instruction (binary): 0b{inst:032b}");
-      // println!("                        OPCD0000000000000000000AAABBBCCC");
+      let c = get(&RC, &inst) as usize;
 
 
       let character = stdin().read(&mut buffer);
@@ -344,25 +335,21 @@ impl UM {
     //Load Program OP 12
     o if o == Opcode::LoadProgram as u32 => {
 
-      //println!("goto r{} in program m[r{}];", get(&RC, inst), get(&RB, inst));
-      //println!("___________________________________________________________");
+      let b_val = *self.register.get(get(&RB, &inst) as usize);
 
-      let b_val = self.register.get(get(&RB, inst) as usize);
-
-      let c_val = self.register.get(get(&RC, inst) as usize);
+      let c_val = *self.register.get(get(&RC, &inst) as usize);
 
 
       //new stuff
       //do not clone mem seg 0
-      //this alone cut time in half
       
-        if b_val != 0 {
+        if b_val != 0  {
           
           let value = self.memory.memory_segments[b_val as usize].clone();
           self.memory.memory_segments[0] = value;
 
         }
-
+        
         let counter_value = c_val as usize;
 
         self.counter =  counter_value;
@@ -371,12 +358,10 @@ impl UM {
 
     //Load Value OP 13
     o if o == Opcode::LoadValue as u32 => {
-
-      //println!("r{} := {};", get(&RL, inst), get(&VL, inst));
       
       
-      self.register.set(get(&RL, inst) as usize,
-      get(&VL, inst));
+      self.register.set(get(&RL, &inst) as usize,
+      get(&VL, &inst));
       self.counter += 1;
     },
   
@@ -388,7 +373,8 @@ impl UM {
 }
 
 
-//////////////////// Parsing \\\\\\\\\\\\\\\\\\\\
+//////////////////// Instruction Parsing \\\\\\\\\\\\\\\\\\\\
+
 static RA: Field = Field{width: 3, lsb: 6};
 static RB: Field = Field{width: 3, lsb: 3};
 static RC: Field = Field{width: 3, lsb: 0};
@@ -400,15 +386,13 @@ static OP: Field = Field{width: 4, lsb: 28};
 fn mask(bits: u32) -> u32{ ( 1 << bits) - 1 }
 
 #[inline]
-pub fn get(field: &Field, instruction: Umi) -> u32 {
+pub fn get(field: &Field, instruction: &Umi) -> u32 {
   (instruction >> field.lsb) & mask(field.width)
 }
 
 pub fn op(instruction: Umi) -> u32 {
 (instruction >> OP.lsb) & mask(OP.width)
 } 
-
-
 
 
 //////////////////// Helper Functions \\\\\\\\\\\\\\\\\\\\
@@ -419,72 +403,17 @@ fn bitwise_nand(a:u32,b:u32) -> u32{
   !(a & b)
 }
 
-fn add(a:u32,b:u32) -> u32{
-  a.wrapping_add(b)
+fn add(a:&u32,b:&u32) -> u32{
+  a.wrapping_add(*b)
 }
 
-fn mul(a:u32,b:u32) -> u32{
-  a.wrapping_mul(b)
+fn mul(a:&u32,b:&u32) -> u32{
+  a.wrapping_mul(*b)
 }
 
-fn div(a:u32,b:u32) -> u32{
+fn div(a:&u32,b:&u32) -> u32{
   a/b
 }
-
-
-// //RUMDump pseudo-code
-// pub fn disassemble_skel(inst: Umi) -> String {
-
-//     match get(&OP, inst) {
-//     o if o == Opcode::CMov as u32 => {
-//       format!("if (r{} != 0) r{} := r{};", get(&RC, inst), get(&RA, inst), get(&RB, inst))
-//     },
-//     o if o == Opcode::Load as u32 => {
-//       format!("r{} := m[r{}][r{}];", get(&RA, inst), get(&RB, inst), get(&RC, inst))
-//     },
-//     o if o == Opcode::Store as u32 => {
-//       format!("m[r{}][r{}] := r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst))
-//     },
-//     o if o == Opcode::Add as u32 => {
-//       format!("r{} := r{} + r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst))
-//     },
-//     o if o == Opcode::Mul as u32 => {
-//       format!("r{} := r{} * r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst))
-//     },
-//     o if o == Opcode::Div as u32 => {
-//       format!("r{} := r{} / r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst))
-//     },
-//     o if o == Opcode::Nand as u32 => {
-//       format!("r{} := r{} nand r{};", get(&RA, inst), get(&RB, inst), get(&RC, inst))
-//     },
-//     o if o == Opcode::Halt as u32 => {
-//       format!("halt")
-//     },
-//     o if o == Opcode::MapSegment as u32 => {
-//       format!("r{} := map segment (r{} words);", get(&RB, inst), get(&RC, inst))
-//     },
-//     o if o == Opcode::UnmapSegment as u32 => {
-//       format!("unmap r{};", get(&RC, inst))
-//     },
-//     o if o == Opcode::Output as u32 => {
-//       format!("output r{};", get(&RC, inst))
-//     },
-
-//     o if o == Opcode::Input as u32 => {
-//       format!("r{} := input();", get(&RC, inst))
-//     },
-//     o if o == Opcode::LoadProgram as u32 => {
-//       format!("goto r{} in program m[r{}];", get(&RC, inst), get(&RB, inst))
-//     },
-//     o if o == Opcode::LoadValue as u32 => {
-//       format!("r{} := {};", get(&RL, inst), get(&VL, inst))
-//     },
-
-//     _ => {
-//       format!(".data 0x{:x}", inst)
-//     }
-//   }
-// }
 
 
 #[derive(Debug, PartialEq, Copy, Clone)]
